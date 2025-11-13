@@ -4,7 +4,7 @@ export const getMockGeminiResponse = (): GeminiResponse => {
   return {
     success: true,
     data: {
-      retoType: "columns",
+      retroType: "columns",
       columns: [
         {
           id: "start",

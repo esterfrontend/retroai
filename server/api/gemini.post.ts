@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 CRITICAL: You MUST respond ONLY with valid JSON in the following exact structure. Do not include any markdown, code blocks, or additional text outside the JSON:
 
 {
-  "retoType": "one_of_the_three_dynamics_below",
+  "retroType": "one_of_the_three_dynamics_below",
   "columns": [
     { "id": "column_id", "label": "Dynamic Label", "description": "Column description", "color": "hex_color_or_color_name" }
   ],
@@ -45,7 +45,7 @@ CRITICAL: You MUST respond ONLY with valid JSON in the following exact structure
   }
 }
 
-The retoType MUST be one of these 3 constant dynamics (choose the most appropriate based on the team's needs and the prompt):
+The retroType MUST be one of these 3 constant dynamics (choose the most appropriate based on the team's needs and the prompt):
 
 1. "columns" - Linear column layout for sequential or categorized feedback
    - Use for: Start/Stop/Continue, Mad/Sad/Glad, or any linear categorization
@@ -74,7 +74,7 @@ Each column MUST include a "color" field. Use hex color codes (e.g., "#3B82F6" f
 - Negative columns (Stop, Lacked): use cooler colors like red (#EF4444), orange (#F59E0B), or gray (#6B7280)
 - Neutral columns (Continue, Learned): use balanced colors like yellow (#EAB308), teal (#14B8A6), or indigo (#6366F1)
 
-Based on the user's prompt, select the most appropriate retoType and create dynamic, contextually relevant columns with meaningful labels, descriptions, and distinct colors. The instructions should explain why this dynamic was chosen. Provide actionable suggestions. Choose appropriate layout and color scheme.`;
+Based on the user's prompt, select the most appropriate retroType and create dynamic, contextually relevant columns with meaningful labels, descriptions, and distinct colors. The instructions should explain why this dynamic was chosen. Provide actionable suggestions. Choose appropriate layout and color scheme.`;
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
@@ -108,11 +108,11 @@ Based on the user's prompt, select the most appropriate retoType and create dyna
       });
     }
 
-    // Validate retoType
-    if (!RETRO_TYPES.includes(parsedResponse.retoType as any)) {
+    // Validate retroType
+    if (!RETRO_TYPES.includes(parsedResponse.retroType as any)) {
       throw createError({
         statusCode: 500,
-        message: `Invalid retoType. Must be one of: ${RETRO_TYPES.join(", ")}`,
+        message: `Invalid retroType. Must be one of: ${RETRO_TYPES.join(", ")}`,
       });
     }
 
@@ -130,36 +130,36 @@ Based on the user's prompt, select the most appropriate retoType and create dyna
 
     // Validate quadrant must have exactly 4 columns
     if (
-      parsedResponse.retoType === "quadrant" &&
+      parsedResponse.retroType === "quadrant" &&
       parsedResponse.columns.length !== 4
     ) {
       throw createError({
         statusCode: 500,
-        message: "Quadrant retoType must have exactly 4 columns",
+        message: "Quadrant retroType must have exactly 4 columns",
       });
     }
 
     // Validate column count ranges
-    if (parsedResponse.retoType === "columns") {
+    if (parsedResponse.retroType === "columns") {
       if (
         parsedResponse.columns.length < 2 ||
         parsedResponse.columns.length > 5
       ) {
         throw createError({
           statusCode: 500,
-          message: "Columns retoType must have between 2 and 5 columns",
+          message: "Columns retroType must have between 2 and 5 columns",
         });
       }
     }
 
-    if (parsedResponse.retoType === "free") {
+    if (parsedResponse.retroType === "free") {
       if (
         parsedResponse.columns.length < 3 ||
         parsedResponse.columns.length > 5
       ) {
         throw createError({
           statusCode: 500,
-          message: "Free retoType must have between 3 and 5 columns",
+          message: "Free retroType must have between 3 and 5 columns",
         });
       }
     }
