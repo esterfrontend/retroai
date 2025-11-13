@@ -75,7 +75,6 @@ const cardHeights = ref<Record<string, number>>({});
 
 const boardColumns = computed(() => {
   if (!board.value?.columns) return [];
-  console.log(board.value.columns);
   return board.value.columns.map((col: any) => ({
     id: col.id,
     label: col.label,

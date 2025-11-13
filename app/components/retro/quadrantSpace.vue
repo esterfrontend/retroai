@@ -28,12 +28,13 @@
               class="note-content"
               placeholder="New note..."
               rows="3"
+              @blur="handleNoteBlur(note.id)"
             />
             <button
               class="note-delete"
               @click="removeNote(note.id)"
               aria-label="Delete note"
-              v-if="note.user === userStore.getName"
+              v-if="note.userId === userStore.getName"
             >
               ×
             </button>
@@ -70,9 +71,12 @@ type Note = {
   user: string;
 };
 
-const { board } = defineProps<{
+const { board, notes } = defineProps<{
   board: IBoard;
+  notes: RetroNote[];
 }>();
+
+const localNotes = ref<RetroNote[]>(notes);
 
 const quadrants = computed(() => {
   const columns = board.columns;
@@ -99,7 +103,6 @@ const quadrants = computed(() => {
   return defaultQuadrants.slice(0, 4);
 });
 
-const notes = ref<Note[]>([]);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const noteRefs = ref<Map<string, any>>(new Map());
 
@@ -109,8 +112,8 @@ const setNoteRef = (el: HTMLElement | null, noteId: string) => {
   }
 };
 
-const getNotesForQuadrant = (columnId: string): Note[] => {
-  return notes.value.filter((note) => note.columnId === columnId);
+const getNotesForQuadrant = (columnId: string): RetroNote[] => {
+  return localNotes.value.filter((note) => note.columnId === columnId);
 };
 
 const addNote = async (columnId: string): Promise<void> => {
@@ -121,21 +124,13 @@ const addNote = async (columnId: string): Promise<void> => {
     user: userStore.getName,
   };
 
-  // TODO
-  // should be after the api call
-  notes.value.push(newNote);
-
-  try {
-    await retrospectiveStore.addNote({
-      id: newNote.id,
-      columnId: newNote.columnId,
-      userId: newNote.user,
-      content: newNote.content,
-      createdAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("[addNote]", error);
-  }
+  localNotes.value.push({
+    id: newNote.id,
+    columnId: newNote.columnId,
+    userId: newNote.user,
+    content: newNote.content,
+    createdAt: new Date().toISOString(),
+  });
 
   nextTick(() => {
     const noteElement = noteRefs.value.get(newNote.id);
@@ -151,18 +146,49 @@ const addNote = async (columnId: string): Promise<void> => {
 };
 
 const removeNote = (noteId: string): void => {
-  notes.value = notes.value.filter((note) => note.id !== noteId);
+  // REMOVE NOTE
   noteRefs.value.delete(noteId);
+};
+
+const route = useRoute();
+const { createPost } = useMongodbApi();
+
+const handleNoteBlur = async (noteId: string): Promise<void> => {
+  console.log("handleNoteBlur", noteId);
+
+  const note = notes.find((note: RetroNote) => note.id === noteId);
+  if (!note) return;
+
+  const boardId = (route.query.id as string) || "";
+  if (!boardId) {
+    console.error("[handleNoteBlur] No board ID found in route");
+    return;
+  }
+
+  // TODO NOT WORKING
+  // try {
+  //   const response = await createPost(boardId, {
+  //     content: note.content,
+  //     userId: note.userId,
+  //     columnId: note.columnId,
+  //   });
+
+  //   if (response.success) {
+  //     console.log("Note saved successfully", response);
+  //   }
+  // } catch (error) {
+  //   console.error("[addNote]", error);
+  // }
 };
 
 const retrospectiveStore = useRetrospectiveStore();
 const router = useRouter();
 
 const handleLogNotes = (): void => {
-  const retroNotes: RetroNote[] = notes.value.map((note) => ({
+  const retroNotes: RetroNote[] = notes.map((note: RetroNote) => ({
     id: note.id,
     columnId: note.columnId,
-    userId: note.user || userStore.getName || "",
+    userId: note.userId || userStore.getName || "",
     content: note.content,
     createdAt: new Date().toISOString(),
   }));

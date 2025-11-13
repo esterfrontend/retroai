@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { RETRO_TYPES } from "~/models/retrospective";
+import { RETRO_TYPES, type RetroNote } from "~/models/retrospective";
 
 const route = useRoute();
 const retrospectiveStore = useRetrospectiveStore();
+
+const noteList = ref<RetroNote[]>([]);
 
 const currentBoard = computed(() => retrospectiveStore.current);
 
@@ -16,7 +18,14 @@ const COMPONENTS = {
   [RETRO_TYPES.QUADRANT]: RetroQuadrant,
 };
 
-const boardType = computed(() => RETRO_TYPES.COLUMNS);
+console.log("TYPEEE", currentBoard.value);
+const boardType = computed(
+  () =>
+    COMPONENTS[currentBoard.value?.retroType as keyof typeof COMPONENTS] ||
+    RETRO_TYPES.QUADRANT
+);
+
+const notes = computed(() => retrospectiveStore.notes);
 
 const component = computed(
   () => COMPONENTS[boardType.value as keyof typeof COMPONENTS]
@@ -26,13 +35,33 @@ onMounted(async () => {
   if (!retrospectiveStore.hasCurrent) {
     await retrospectiveStore.fetchBoard(route.query.id as string);
   }
+  if (retrospectiveStore.notes.length > 0) {
+    noteList.value = [...retrospectiveStore.notes];
+  }
 });
+
+watch(
+  () => retrospectiveStore.notes.length,
+  () => {
+    const newStoreNotes = retrospectiveStore.notes;
+    if (!newStoreNotes || newStoreNotes.length === 0) return;
+
+    const existingNoteIds = new Set(noteList.value.map((note) => note.id));
+    const trulyNewNotes = newStoreNotes.filter(
+      (storeNote) => !existingNoteIds.has(storeNote.id)
+    );
+
+    if (trulyNewNotes.length > 0) {
+      noteList.value.push(...trulyNewNotes);
+    }
+  }
+);
 </script>
 
 <template>
   <div class="retrospective-container">
     <div class="retrospective-board" v-if="currentBoard">
-      <component :is="component" :board="currentBoard" />
+      <component :is="component" :board="currentBoard" :notes="notes" />
     </div>
   </div>
 </template>

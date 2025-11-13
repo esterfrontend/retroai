@@ -164,7 +164,7 @@ const retrospectiveDataToUse = computed(() => {
 
     return {
       id: boardId,
-      template: board.retoType,
+      template: board.retroType,
       columns: board.columns.map((col) => ({
         id: col.id,
         label: col.label,
