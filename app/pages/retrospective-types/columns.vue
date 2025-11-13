@@ -1,12 +1,12 @@
 <template>
   <div class="retrospective-container">   
       <div v-for="column in typeColumnsMock.data.notes" :key="column.id" :class="['retrospective-column', `column-${column.id}`]">
-        <form @submit.prevent="handleSubmit(column.id)" class="retrospective-form">
+        <form @submit.prevent="handleSubmit" class="retrospective-form">
           <h2 class="column-title" :style="{ 'color': column.color }">{{ column.label }}</h2>
           <p class="column-description">{{ column.description }}</p>
           <div class="input-group">
             <textarea
-            v-model="inputText[column.id]"
+            v-model="inputText"
             type="text"
             placeholder="Escribe tus opiniones..."
             required
@@ -14,7 +14,7 @@
             class="textarea-field"
             />
           </div>
-          <button type="submit" class="submit-button" :disabled="!inputText[column.id]?.trim()" :style="{ 'background-color': column.color }">
+          <button type="submit" class="submit-button" :disabled="!inputText?.trim()" :style="{ 'background-color': column.color }">
             Add
           </button>
         </form>
@@ -67,23 +67,45 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useMongodbApi } from '~/composables/useMongodbApi';
 import { typeColumnsMock } from '~/mocks/typeColumns.mock'
 
 const route = useRoute()
+const { createPost } = useMongodbApi();
+
 const userName = useUserStore().getName
 
 const retrospectiveID = ref(route.query.id as string || '')
 
 const board = ref<any>(null);
-const inputText = ref<Record<string, string>>({})
+const inputText = ref('')
 const cardRefs = ref<Record<string, HTMLElement>>({})
 const cardHeights = ref<Record<string, number>>({})
 
-const handleSubmit = (columnId: string) => {
-  if (inputText.value[columnId]?.trim()) {
-    // Aquí puedes procesar el texto ingresado
-    console.log(`Texto ingresado para ${columnId}:`, inputText.value[columnId].trim())
-    // Por ejemplo: enviar a una API, guardar en estado, etc.
+const handleSubmit = async () => {
+  if (inputText.value.trim()) {
+
+
+    try {
+      const res = await createPost(
+       retrospectiveID.value, 
+        {
+          content: inputText.value.trim(),
+          userId: userName,
+          columnId: 'start'
+        } 
+      )
+      
+      if (res.success) {
+        navigateTo(`/retrospective?id=${retrospectiveID.value}`)
+        return
+      }
+
+      console.warn('Error creating post:', res.message)
+    } catch (err: any) {
+      console.error('[handleSubmit]', err)
+      alert('Error creating post. Please try again later.')
+    }
   }
 }
 

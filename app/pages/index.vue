@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from '~/stores/user'
+import { useMongodbApi } from '~/composables/useMongodbApi';
 
 const userName = ref("");
 const userEmail = ref("");
@@ -73,6 +74,8 @@ const retrospectiveID = ref("");
 
 const creatorName = ref("");
 const creatorEmail = ref("");
+
+const { joinBoard } = useMongodbApi();
 
 const buttonDisabled = computed(() => {
   return (
@@ -101,23 +104,17 @@ const handleSubmit = async () => {
     
 
   try {
-    const res: any = await $fetch(`/api/boards/join`, {
-      method: 'POST',
-      body: {
-        boardId,
-        user: { name, email }
-      }
-    })
-
-    if (!res.success) {
-      alert(res.message || 'Board does not exist')
+    const res = await joinBoard(boardId, { name, email })
+    
+    if (res.success) {
+      navigateTo(`/retrospective-types/columns?id=${boardId}`)
       return
     }
 
-    navigateTo(`/retrospective-types/columns?id=${boardId}`)
-
+    console.warn('Error joining board:', res.message)
   } catch (err: any) {
-    console.error(err)
+    console.error('[handleSubmit]', err)
+    alert('Error joining board. Please try again later.')
   }
 };
 
