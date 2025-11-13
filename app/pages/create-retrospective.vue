@@ -24,14 +24,19 @@
 </template>
 
 <script setup lang="ts">
+import { typeColumnsMock } from '~/mocks/typeColumns.mock'
+
 const route = useRoute()
 const userName = ref(route.query.name as string || 'Usuario')
 const retrospectiveDescription = ref('')
 
 const handleSubmit = () => {
   if (retrospectiveDescription.value.trim()) {
-    // Aquí puedes procesar el texto ingresado
+    // TODO: procesar el texto con IA
     console.log('Texto ingresado:', retrospectiveDescription.value.trim())
+    
+    // TODO: La IA nos devolverá el tipo de retrospectiva
+    navigateTo(`/retrospective-types/${typeColumnsMock.data.retroType }`)
   }
 }
 </script>

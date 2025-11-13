@@ -4,7 +4,6 @@
     <div class="cards-container">
       <div class="card">
         <h2 class="subtitle">Accede a una retrospectiva</h2>
-        
         <form @submit.prevent="handleSubmit" class="form">
           <input
             v-model="userName"
@@ -65,6 +64,8 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from '~/stores/user'
+
 const userName = ref('')
 const userEmail = ref('')
 const retrospectiveID = ref('')
@@ -78,7 +79,13 @@ const buttonDisabled = computed(() => {
 
 const handleSubmit = () => {
   if (userName.value.trim() && userEmail.value.trim() && retrospectiveID.value.trim()) {
-    navigateTo(`/retrospective?name=${userName.value.trim()}&email=${userEmail.value.trim()}&id=${retrospectiveID.value.trim()}`)
+    const userData = {
+      name: userName.value.trim(),
+      email: userEmail.value.trim(),
+    }
+    useUserStore().setUserData(userData)
+    
+    navigateTo(`/retrospective-types/columns?id=${retrospectiveID.value.trim()}`)
   }
 }
 
