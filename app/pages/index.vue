@@ -1,111 +1,129 @@
 <template>
-  <div class="container">
-    <header>
-      <h1>Bienvenido a Nuxt</h1>
-      <p>Proyecto base creado con Nuxt 4</p>
-    </header>
-    
-    <main>
-      <section class="info">
-        <h2>🚀 Proyecto listo para desarrollar</h2>
-        <p>Este es un proyecto base de Nuxt configurado con:</p>
-        <ul>
-          <li>Nuxt 4</li>
-          <li>Vue 3</li>
-          <li>TypeScript</li>
-          <li>pnpm</li>
-        </ul>
-      </section>
+  <div class="login-container">
+    <div class="login-card">
+      <h1>Retrospective AI</h1>
+      <p class="subtitle">Ingresa tu nombre para comenzar</p>
       
-      <section class="actions">
-        <h3>Comandos disponibles:</h3>
-        <div class="commands">
-          <code>pnpm dev</code> - Iniciar servidor de desarrollo
-          <code>pnpm build</code> - Construir para producción
-          <code>pnpm preview</code> - Previsualizar build de producción
+      <form @submit.prevent="handleSubmit" class="login-form">
+        <div class="input-group">
+          <input
+            v-model="userName"
+            type="text"
+            placeholder="Tu nombre"
+            required
+            autofocus
+            class="input-field"
+          />
         </div>
-      </section>
-    </main>
+        
+        <button type="submit" class="submit-button" :disabled="!userName.trim()">
+          Continuar
+        </button>
+      </form>
+    </div>
   </div>
 </template>
 
+<script setup lang="ts">
+const userName = ref('')
+
+const handleSubmit = () => {
+  if (userName.value.trim()) {
+    // Aquí puedes guardar el nombre del usuario y navegar a otra página
+    // Por ejemplo: navigateTo('/dashboard')
+    console.log('Usuario:', userName.value.trim())
+  }
+}
+</script>
+
 <style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: system-ui, -apple-system, sans-serif;
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
 }
 
-header {
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
   text-align: center;
-  margin-bottom: 3rem;
-}
-
-header h1 {
-  font-size: 2.5rem;
-  color: #00dc82;
-  margin-bottom: 0.5rem;
-}
-
-header p {
-  font-size: 1.2rem;
-  color: #666;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-section {
-  background: #f5f5f5;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
-
-section h2 {
-  margin-top: 0;
   color: #333;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
-section h3 {
-  margin-top: 0;
-  color: #555;
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-ul li {
-  padding: 0.5rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-ul li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #00dc82;
-  font-weight: bold;
-}
-
-.commands {
+.login-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
-code {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  display: inline-block;
+.input-group {
+  width: 100%;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-field::placeholder {
+  color: #999;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
