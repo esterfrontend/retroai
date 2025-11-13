@@ -13,14 +13,14 @@ export interface Column {
 
 export interface IColumns {
   retroType: "columns",
-  columns: Column[],
+  notes: Column[],
   instructions: string,
   suggestions: string
 }
 
 export interface IQuadrant {
   retroType: "quadrant",
-  columns: Column[],
+  notes: Column[],
   instructions: string,
   suggestions: string,
   metadata: {
@@ -32,7 +32,7 @@ export interface IQuadrant {
 
 export interface IFree {
   retroType: "free",
-  columns: Column[],
+  notes: Column[],
   instructions: string,
   suggestions: string
 }
