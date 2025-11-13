@@ -11,7 +11,9 @@ const EmbeddedUserSchema = new Schema<IEmbeddedUser>({
 
 const ColumnSchema = new Schema({
   id: { type: String, required: true },
-  label: { type: String, required: true }
+  label: { type: String, required: true },
+  description: { type: String, required: false },
+  color: { type: String, required: false }
 }, { _id: false })
 
 const NoteSchema = new Schema({
@@ -24,8 +26,8 @@ const NoteSchema = new Schema({
 
 export interface IBoard extends Document {
   name: string
-  retoType: string
-  columns: { id: string; label: string }[]
+  retroType: string
+  columns: { id: string; label: string; description?: string; color?: string }[]
   notes: {
     id: string
     columnId: string
@@ -41,7 +43,7 @@ export interface IBoard extends Document {
 const BoardSchema = new Schema<IBoard>(
   {
     name: { type: String },
-    retoType: { type: String, required: true },
+    retroType: { type: String, required: true },
     columns: { type: [ColumnSchema], default: [], required: true },
     notes: { type: [NoteSchema], default: [] },
     users: { type: [EmbeddedUserSchema], default: [] },

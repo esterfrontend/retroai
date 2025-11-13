@@ -2,13 +2,13 @@ import Board, { type IBoard } from '~/models/Board'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { name, retoType, columns, user } = body
+  const { name, retroType, columns, user } = body
 
   try {
     // Create board
     const board: IBoard = await Board.create({
       name,
-      retoType,
+      retroType,
       columns,
       users: [],
       notes: []

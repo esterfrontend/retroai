@@ -37,7 +37,7 @@ export type RetroNote = {
 export type RetrospectiveData = {
   id: string;
   template: string;
-  columns: Array<{ id: string; label: string }>;
+  columns: Array<{ id: string; label: string; description: string; color: string }>;
   notes: RetroNote[];
 };
 

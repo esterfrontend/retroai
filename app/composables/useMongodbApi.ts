@@ -11,7 +11,7 @@ export const useMongodbApi = () => {
         method: 'POST',
         body: {
           name: data.name || 'Untitled Retrospective',
-          retoType: data.retoType || 'columns',
+          retroType: data.retroType || 'columns',
           columns: data.columns ? [...data.columns] : [],
           user: data.user,
         },

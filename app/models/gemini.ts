@@ -1,7 +1,7 @@
 import type { RetroColumn, RetroMetadata, ActionPoint } from "./retrospective";
 
 export type RetrospectiveSuggestionData = {
-  retoType: string;
+  retroType: string;
   columns: RetroColumn[];
   instructions: string;
   suggestions: string;

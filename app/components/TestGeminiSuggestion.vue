@@ -43,7 +43,7 @@
           <div class="response-field">
             <strong>Retro Type:</strong>
             <span class="retro-type-badge">{{
-              geminiResponse.data.retoType
+              geminiResponse.data.retroType
             }}</span>
           </div>
           <div class="response-field">

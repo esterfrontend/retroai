@@ -1,26 +1,24 @@
 <template>
   <div class="retrospective-container">  
-      <div v-for="column in typeColumnsMock.columns" :key="column.id" :class="['retrospective-column', `column-${column.id}`]">
-        <form @submit.prevent="handleSubmit" class="retrospective-form">
-          <h2 class="column-title" :style="{ 'color': column.color }">{{ column.label }}</h2>
-          <p class="column-description">{{ column.description }}</p>
-          <div class="input-group">
-            <textarea
-            v-model="inputText"
-            type="text"
-            placeholder="Escribe tus opiniones..."
-            required
-            autofocus
-            class="textarea-field"
-            />
-          </div>
-          <button type="submit" class="submit-button" :disabled="!inputText?.trim()" :style="{ 'background-color': column.color }">
+      <div v-for="column in boardColumns" :key="column.id" :class="['retrospective-column', `column-${column.id}`]">
+        <h2 class="column-title" :style="{ 'color': column.color }">{{ column.label }}</h2>
+        <p class="column-description">{{ column.description }}</p>
+        <form @submit.prevent="handleCreatePost(column.id)" class="retrospective-form">
+          <textarea
+          v-model="inputTexts[column.id]"
+          type="text"
+          placeholder="Escribe tus opiniones..."
+          required
+          autofocus
+          class="textarea-field"
+          />
+          <button type="submit" class="submit-button" :disabled="!inputTexts[column.id]?.trim()" :style="{ 'background-color': column.color }">
             Add
           </button>
         </form>
 
         <div class="retrospective-cards">
-          <div class="card-wrapper">
+          <div v-for="post in getPostsByColumnId(column.id)" :key="post.id" class="card-wrapper">
             <div 
             :ref="(el) => setCardRef(el, column.id, 0)" 
             class="card" 
@@ -29,34 +27,7 @@
               'min-height': cardHeights[`${column.id}-0`] ? `${cardHeights[`${column.id}-0`]}px` : 'auto'
             }"
             >
-              <p class="card-text" >Use the new retrospective platform</p>
-              <p class="card-author">{{ userName }}</p>
-            </div>
-          </div>
-
-          <div class="card-wrapper">
-            <div 
-            :ref="(el) => setCardRef(el, column.id, 1)" 
-            class="card" 
-            :style="{ 
-              'background-color': column.color,
-              'min-height': cardHeights[`${column.id}-1`] ? `${cardHeights[`${column.id}-1`]}px` : 'auto'
-            }"
-              >
-              <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos</p>
-              <p class="card-author">{{ userName }}</p>
-            </div>
-          </div>
-          <div class="card-wrapper">
-            <div 
-            :ref="(el) => setCardRef(el, column.id, 0)" 
-            class="card" 
-            :style="{ 
-              'background-color': column.color,
-              'min-height': cardHeights[`${column.id}-0`] ? `${cardHeights[`${column.id}-0`]}px` : 'auto'
-            }"
-            >
-              <p class="card-text" >Use the new retrospective platform</p>
+              <p class="card-text">{{ post.content }}</p>
               <p class="card-author">{{ userName }}</p>
             </div>
           </div>
@@ -66,46 +37,83 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useMongodbApi } from '~/composables/useMongodbApi';
-import { typeColumnsMock } from '~/mocks/typeColumns.mock'
+import type { IBoard } from '~/models/Board';
 
 const route = useRoute()
-const { createPost } = useMongodbApi();
+const { createPost, getBoardById } = useMongodbApi();
 
 const userName = useUserStore().getName
 
 const retrospectiveID = ref(route.query.id as string || '')
 
-const board = ref<any>(null);
-const inputText = ref('')
+const board = ref<IBoard | null>(null);
+const inputTexts = ref<Record<string, string>>({})
 const cardRefs = ref<Record<string, HTMLElement>>({})
 const cardHeights = ref<Record<string, number>>({})
 
-const handleSubmit = async () => {
-  if (inputText.value.trim()) {
+const boardColumns = computed(() => {
+  if (!board.value?.columns) return []
+  console.log(board.value.columns)
+  return board.value.columns.map((col: any) => ({
+    id: col.id,
+    label: col.label,
+    description: col.description || '',
+    color: col.color || '#90c1ff'
+  }))
+})
 
+const posts = computed(() => {
+  if (!board.value?.notes) return []
+  return board.value.notes.map((note: any) => ({
+    id: note.id,
+    content: note.content,
+    userId: note.userId,
+    columnId: note.columnId
+  }))
+})
 
-    try {
-      const res = await createPost(
-       retrospectiveID.value, 
-        {
-          content: inputText.value.trim(),
-          userId: userName,
-          columnId: 'start'
-        } 
-      )
-      
-      if (res.success) {
-        navigateTo(`/retrospective-types/columns?id=${retrospectiveID.value}`)
-        return
-      }
-
-      console.warn('Error creating post:', res.message)
-    } catch (err: any) {
-      console.error('[handleSubmit]', err)
-      alert('Error creating post. Please try again later.')
+const postsByColumnId = computed(() => {
+  const grouped: Record<string, typeof posts.value> = {}
+  posts.value.forEach(post => {
+    if (!grouped[post.columnId]) {
+      grouped[post.columnId] = []
     }
+    grouped[post.columnId]!.push(post)
+  })
+  return grouped
+})
+
+const getPostsByColumnId = (columnId: string) => {
+  return postsByColumnId.value[columnId] || []
+}
+
+const handleCreatePost = async (columnId: string) => {
+  const text = inputTexts.value[columnId]
+  if (!text?.trim()) return
+
+  try {
+    const res = await createPost(
+      retrospectiveID.value, 
+      {
+        content: text.trim(),
+        userId: userName || 'Test User',
+        columnId
+      } 
+    )
+    
+    if (res.success) {
+      inputTexts.value[columnId] = ''
+      await loadBoard()
+    } else {
+      console.warn('Error creating post:', res.message)
+      console.warn('Error creating post:', res)
+      // alert('Error creating post. Please try again later.')
+    }
+  } catch (err: any) {
+    console.error('[handleCreatePost]', err)
+    alert('Error creating post. Please try again later.')
   }
 }
 
@@ -152,10 +160,7 @@ const loadBoard = async () => {
   if (!retrospectiveID.value) return
 
   try {
-    const res: any = await $fetch(`/api/boards`, {
-      method: 'GET',
-      params: { id: retrospectiveID.value }
-    });
+    const res: any = await getBoardById(retrospectiveID.value);
 
     if (res.success) {
       board.value = res.board
