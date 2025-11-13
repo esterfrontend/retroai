@@ -26,12 +26,43 @@
 <script setup lang="ts">
 const route = useRoute()
 const userName = ref(route.query.name as string || 'Usuario')
+const userEmail = ref(route.query.email as string || 'Email')
+
 const retrospectiveDescription = ref('')
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (retrospectiveDescription.value.trim()) {
-    // Aquí puedes procesar el texto ingresado
     console.log('Texto ingresado:', retrospectiveDescription.value.trim())
+
+
+    // ! Update with Gemini info
+    const __dummyGeminiResponse = {
+      name: 'Retropectiva dormakaba',
+      tempalte: 'columns',
+      columns: [],
+      notes: [],
+      users: [],
+    }
+
+    // Post to MongoDB to create board
+    try {
+      const board = await $fetch('/api/boards/create', {
+        method: 'POST',
+        body: {
+          ...__dummyGeminiResponse, 
+          user: {
+            name: userName.value, 
+            email: userEmail.value
+          } 
+        },
+      }).then(res => {
+        navigateTo(`/retrospective?id=${res.board._id}`)
+      })
+
+
+    } catch (err) {
+      console.error('Error creando tablero:', err)
+    }
   }
 }
 </script>
