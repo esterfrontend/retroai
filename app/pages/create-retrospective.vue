@@ -161,6 +161,7 @@ const handleAccept = async () => {
     const res = await createBoard({
       name: "dummy",
       ...geminiResponse.value!.data,
+      admin: userEmail.value,
       user: {
         name: userName.value,
         email: userEmail.value,
