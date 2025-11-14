@@ -54,7 +54,7 @@ const notes = computed(() => retrospectiveStore.notes);
 const userEmail = computed(() => userStore.getEmail);
 const userName = computed(() => userStore.getName);
 const adminEmail = computed(() => currentBoard.value?.admin);
-const isAdmin = computed(() => adminEmail.value === userEmail.value);
+const isAdmin = computed(() => adminEmail.value?.trim() == userEmail.value.trim());
 
 const participants = computed(() => {
   const users = currentBoard.value?.users || [];
@@ -143,6 +143,7 @@ watch(
     <div class="retrospective-board" v-if="currentBoard">
       <component :is="component" :board="currentBoard" :notes="notes" />
       <div class="actions-footer">
+      <pre>Xxx-{{ adminEmail }} {{ userEmail }}</pre>
         <button v-if="isAdmin" class="log-notes-button" @click="handleLogNotes">
           Finish retrospective
         </button>

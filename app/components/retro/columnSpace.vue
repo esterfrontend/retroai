@@ -298,6 +298,7 @@ onUnmounted(() => {
 
 .card-text {
   font-size: 1.4rem;
+  line-height: 1.4rem;
 }
 
 .card-author {

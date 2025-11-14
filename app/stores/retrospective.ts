@@ -37,6 +37,7 @@ export const useRetrospectiveStore = defineStore("retrospective", {
       const { getBoardById } = useMongodbApi();
       const response = await getBoardById(this.current?._id?.toString() || "");
       if (response.success) {
+        this.setCurrent(response.board as unknown as IBoard);
         const notes = response.board?.notes as RetroNote[];
         this.setNotes(notes);
       }

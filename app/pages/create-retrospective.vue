@@ -132,6 +132,8 @@ import type { IBoard } from "~/models/Board";
 import { RETRO_TYPES } from "~/models/retrospective";
 
 const route = useRoute();
+const userStore = useUserStore();
+
 const retrospectiveStore = useRetrospectiveStore();
 const userName = ref((route.query.name as string) || "Usuario");
 const userEmail = ref((route.query.email as string) || "Email");
@@ -169,6 +171,10 @@ const handleAccept = async () => {
 
     if (res.success) {
       retrospectiveStore.setNewBoard(res.board as unknown as IBoard);
+      userStore.setUserData({
+        name: userName.value,
+        email: userEmail.value,
+      });
       navigateTo(`/retro?id=${(res.board as any)._id}`);
       return;
     }
