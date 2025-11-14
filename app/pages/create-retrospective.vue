@@ -315,6 +315,7 @@ const handleAccept = async () => {
 }
 
 .response-container {
+  max-width: 800px;
   margin-top: 1.5rem;
   background: #f5f5f5;
   border-radius: 8px;
