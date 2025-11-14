@@ -72,7 +72,7 @@ watch(
 
 <style scoped>
 .retrospective-container {
-  min-height: 100vh;
+  min-height: 95vh;
   background: linear-gradient(135deg, #9aaae5 0%, #b390d9 100%);
   padding: 2rem 1rem;
   display: flex;
