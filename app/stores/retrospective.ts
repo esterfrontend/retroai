@@ -52,9 +52,6 @@ export const useRetrospectiveStore = defineStore("retrospective", {
     async addNote(note: RetroNote): Promise<void> {
       const { createPost } = useMongodbApi();
 
-      // TODO should happen on success
-      this.notes.push(note);
-
       if (!this.current) {
         throw new Error("No current board available");
       }
@@ -67,11 +64,14 @@ export const useRetrospectiveStore = defineStore("retrospective", {
       }
 
       try {
-        const response = await createPost(boardId, {
+        console.log("addNote", note);
+        console.log("boardId", boardId);
+        await createPost(boardId, {
           content: note.content,
           userId: note.userId,
           columnId: note.columnId,
         });
+        this.notes.push(note);
       } catch (error) {
         console.error("[addNote]", error);
       }
