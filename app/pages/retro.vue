@@ -143,7 +143,6 @@ watch(
     <div class="retrospective-board" v-if="currentBoard">
       <component :is="component" :board="currentBoard" :notes="notes" />
       <div class="actions-footer">
-      <pre>Xxx-{{ adminEmail }} {{ userEmail }}</pre>
         <button v-if="isAdmin" class="log-notes-button" @click="handleLogNotes">
           Finish retrospective
         </button>
