@@ -1,7 +1,28 @@
 <script setup lang="ts">
 import { RETRO_TYPES, type RetroNote } from "~/models/retrospective";
 
-const chipColors = ['#FF6B6B','#4ECDC4','#FFD93D','#6A4C93','#1A535C','#FF9F1C','#FF5E7E','#3A86FF','#8338EC','#FB5607','#FF006E','#70D6FF','#9B5DE5','#00BBF9','#00F5D4','#C77DFF','#80ED99','#57CC99','#22577A','#F15BB5'];
+const chipColors = [
+  "#FF6B6B",
+  "#4ECDC4",
+  "#FFD93D",
+  "#6A4C93",
+  "#1A535C",
+  "#FF9F1C",
+  "#FF5E7E",
+  "#3A86FF",
+  "#8338EC",
+  "#FB5607",
+  "#FF006E",
+  "#70D6FF",
+  "#9B5DE5",
+  "#00BBF9",
+  "#00F5D4",
+  "#C77DFF",
+  "#80ED99",
+  "#57CC99",
+  "#22577A",
+  "#F15BB5",
+];
 
 const route = useRoute();
 const router = useRouter();
@@ -11,7 +32,7 @@ const userStore = useUserStore();
 
 const noteList = ref<RetroNote[]>([]);
 const userColors = ref<Record<string, string>>({});
-const copied = ref(false)
+const copied = ref(false);
 
 const currentBoard = computed(() => retrospectiveStore.current);
 
@@ -38,7 +59,7 @@ const isAdmin = computed(() => adminEmail.value === userEmail.value);
 const participants = computed(() => {
   const users = currentBoard.value?.users || [];
 
-  return users.flatMap(user => {
+  return users.flatMap((user) => {
     const color = getUserColor(user.email);
     const enhancedUser = { ...user, color };
 
@@ -52,8 +73,7 @@ const getUserColor = (email: string) => {
     userColors.value[email] = random;
   }
   return userColors.value[email];
-}
-
+};
 
 const setIntervalRefreshBoard = () => {
   setInterval(() => {
@@ -71,9 +91,9 @@ const copyRetrospectiveId = () => {
   copied.value = true;
 
   setTimeout(() => {
-      copied.value = false
-    }, 2000)
-}
+    copied.value = false;
+  }, 2000);
+};
 
 onMounted(async () => {
   if (!retrospectiveStore.hasCurrent) {
@@ -103,7 +123,7 @@ watch(
       </button>
       <p>Owner: {{ adminEmail }}</p>
       <div class="collaborators-list">
-        <span style="margin-right:10px">Collaborators</span>
+        <span style="margin-right: 10px">Collaborators</span>
 
         <div
           class="chip-users"
@@ -115,10 +135,7 @@ watch(
           {{ user.name[0] }}
         </div>
 
-        <div
-          v-if="participants.length > 6"
-          class="chip-users"
-        >
+        <div v-if="participants.length > 6" class="chip-users">
           +{{ participants.length - 6 }}
         </div>
       </div>
@@ -126,17 +143,10 @@ watch(
     <div class="retrospective-board" v-if="currentBoard">
       <component :is="component" :board="currentBoard" :notes="notes" />
       <div class="actions-footer">
-<<<<<<< HEAD
-      <button v-if="isAdmin" class="log-notes-button" @click="handleLogNotes">
-        Finish retrospective
-      </button>
-    </div>
-=======
-        <button class="log-notes-button" @click="handleLogNotes">
+        <button v-if="isAdmin" class="log-notes-button" @click="handleLogNotes">
           Finish retrospective
         </button>
       </div>
->>>>>>> main
     </div>
   </div>
 </template>
@@ -291,5 +301,4 @@ watch(
 .chip-users:hover::before {
   opacity: 1;
 }
-
 </style>
