@@ -1,5 +1,6 @@
 <template>
   <div class="quadrant-space">
+    <p>holi</p>
     <div class="quadrant-grid">
       <div
         v-for="(quadrant, index) in quadrants"
@@ -11,7 +12,8 @@
           <h3 class="quadrant-title">{{ quadrant.label }}</h3>
           <p class="quadrant-description">{{ quadrant.description }}</p>
         </div>
-        <div class="quadrant-content">
+        <div class="quadrant-content" :key="refreshForces">
+          {{ quadrant.id }}
           <div
             v-for="note in getNotesForQuadrant(quadrant.id)"
             :key="note.id"
@@ -76,7 +78,8 @@ const { board, notes } = defineProps<{
   notes: RetroNote[];
 }>();
 
-const localNotes = ref<RetroNote[]>(notes);
+const localNotes = ref<RetroNote[]>([] as RetroNote[]);
+const refreshForces = ref<number>(0);
 
 const quadrants = computed(() => {
   const columns = board.columns;
@@ -154,8 +157,6 @@ const route = useRoute();
 const { createPost } = useMongodbApi();
 
 const handleNoteBlur = async (noteId: string): Promise<void> => {
-  console.log("handleNoteBlur", noteId);
-
   const note = notes.find((note: RetroNote) => note.id === noteId);
   if (!note) return;
 
@@ -197,6 +198,22 @@ const handleLogNotes = (): void => {
 
   router.push("/summary");
 };
+
+onMounted(() => {
+  localNotes.value = notes;
+});
+
+watch(
+  () => notes.length,
+  () => {
+    console.log("notes length", notes.length);
+    const newNotes = filterNewNotes(notes, localNotes.value);
+    if (newNotes.length > 0) {
+      localNotes.value.push(...newNotes);
+    }
+    refreshForces.value++;
+  }
+);
 </script>
 
 <style scoped>

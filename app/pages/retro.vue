@@ -18,18 +18,22 @@ const COMPONENTS = {
   [RETRO_TYPES.QUADRANT]: RetroQuadrant,
 };
 
-console.log("TYPEEE", currentBoard.value);
-const boardType = computed(
-  () =>
-    COMPONENTS[currentBoard.value?.retroType as keyof typeof COMPONENTS] ||
-    RETRO_TYPES.QUADRANT
+console.log(
+  "type of board",
+  COMPONENTS[currentBoard.value?.retroType as keyof typeof COMPONENTS]
+);
+
+const component = computed(
+  () => COMPONENTS[currentBoard.value?.retroType as keyof typeof COMPONENTS]
 );
 
 const notes = computed(() => retrospectiveStore.notes);
 
-const component = computed(
-  () => COMPONENTS[boardType.value as keyof typeof COMPONENTS]
-);
+const setIntervalRefreshBoard = () => {
+  setInterval(() => {
+    retrospectiveStore.refreshBoard();
+  }, 8000);
+};
 
 onMounted(async () => {
   if (!retrospectiveStore.hasCurrent) {
@@ -38,23 +42,15 @@ onMounted(async () => {
   if (retrospectiveStore.notes.length > 0) {
     noteList.value = [...retrospectiveStore.notes];
   }
+  setIntervalRefreshBoard();
 });
 
 watch(
   () => retrospectiveStore.notes.length,
   () => {
-    const newStoreNotes = retrospectiveStore.notes;
-    if (!newStoreNotes || newStoreNotes.length === 0) return;
-
-    const existingNoteIds = new Set(noteList.value.map((note) => note.id));
-    const trulyNewNotes = newStoreNotes.filter(
-      (storeNote) => !existingNoteIds.has(storeNote.id)
-    );
-
-    if (trulyNewNotes.length > 0) {
-      noteList.value.push(...trulyNewNotes);
-    }
-  }
+    noteList.value = retrospectiveStore.notes;
+  },
+  { deep: true }
 );
 </script>
 
