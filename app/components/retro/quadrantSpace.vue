@@ -51,6 +51,7 @@ import type { RetroColumn, RetroNote } from "~/models/retrospective";
 import { getMockGeminiResponse } from "~/utils/mocks";
 
 const userStore = useUserStore();
+const retrospectiveStore = useRetrospectiveStore();
 
 type Note = {
   id: string;
@@ -126,11 +127,6 @@ const addNote = async (columnId: string): Promise<void> => {
   });
 };
 
-const removeNote = (noteId: string): void => {
-  // REMOVE NOTE
-  noteRefs.value.delete(noteId);
-};
-
 const route = useRoute();
 
 // Debounce mechanism to prevent duplicate calls
@@ -170,7 +166,7 @@ const handleNoteBlur = async (noteId: string): Promise<void> => {
 
     try {
       await retrospectiveStore.addNote({
-        id: `note-${Date.now()}-${Math.random().toString(36)}`,
+        id: note.id,
         columnId: note.columnId,
         content: note.content?.trim() || "",
         userId: note.userId || "",
@@ -186,9 +182,6 @@ const handleNoteBlur = async (noteId: string): Promise<void> => {
 
   blurTimeouts.value.set(noteId, timeout);
 };
-
-const retrospectiveStore = useRetrospectiveStore();
-const router = useRouter();
 
 onMounted(() => {
   localNotes.value = notes;
