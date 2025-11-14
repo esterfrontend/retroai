@@ -114,6 +114,14 @@ const addNote = async (columnId: string): Promise<void> => {
     user: userStore.getName,
   };
 
+  localNotes.value.push({
+    id: newNote.id,
+    columnId: newNote.columnId,
+    userId: newNote.user,
+    content: newNote.content,
+    createdAt: new Date().toISOString(),
+  });
+
   nextTick(() => {
     const noteElement = noteRefs.value.get(newNote.id);
     if (noteElement) {
