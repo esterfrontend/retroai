@@ -30,14 +30,7 @@
               rows="3"
               @blur="handleNoteBlur(note.id)"
             />
-            <button
-              class="note-delete"
-              @click="removeNote(note.id)"
-              aria-label="Delete note"
-              v-if="note.userId === userStore.getName"
-            >
-              ×
-            </button>
+            <p class="note-user">{{ note.userId }}</p>
           </div>
         </div>
         <button
@@ -120,14 +113,6 @@ const addNote = async (columnId: string): Promise<void> => {
     user: userStore.getName,
   };
 
-  localNotes.value.push({
-    id: newNote.id,
-    columnId: newNote.columnId,
-    userId: newNote.user,
-    content: newNote.content,
-    createdAt: new Date().toISOString(),
-  });
-
   nextTick(() => {
     const noteElement = noteRefs.value.get(newNote.id);
     if (noteElement) {
@@ -147,29 +132,59 @@ const removeNote = (noteId: string): void => {
 };
 
 const route = useRoute();
-const { createPost } = useMongodbApi();
+
+// Debounce mechanism to prevent duplicate calls
+const blurTimeouts = ref<Map<string, NodeJS.Timeout>>(new Map());
+const isProcessingBlur = ref<Set<string>>(new Set());
 
 const handleNoteBlur = async (noteId: string): Promise<void> => {
-  const note = notes.find((note: RetroNote) => note.id === noteId);
-  if (!note) return;
+  // Clear any existing timeout for this note
+  const existingTimeout = blurTimeouts.value.get(noteId);
+  if (existingTimeout) {
+    clearTimeout(existingTimeout);
+  }
 
-  const boardId = (route.query.id as string) || "";
-  if (!boardId) {
-    console.error("[handleNoteBlur] No board ID found in route");
+  // If already processing, skip
+  if (isProcessingBlur.value.has(noteId)) {
     return;
   }
 
-  try {
-    await retrospectiveStore.addNote({
-      id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      columnId: note.columnId,
-      content: note.content?.trim() || "",
-      userId: note.userId || "",
-      createdAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("[addNote]", error);
-  }
+  // Set a debounce timeout
+  const timeout = setTimeout(async () => {
+    isProcessingBlur.value.add(noteId);
+
+    const note = notes.find((note: RetroNote) => note.id === noteId);
+    if (!note) {
+      isProcessingBlur.value.delete(noteId);
+      blurTimeouts.value.delete(noteId);
+      return;
+    }
+
+    const boardId = (route.query.id as string) || "";
+    if (!boardId) {
+      console.error("[handleNoteBlur] No board ID found in route");
+      isProcessingBlur.value.delete(noteId);
+      blurTimeouts.value.delete(noteId);
+      return;
+    }
+
+    try {
+      await retrospectiveStore.addNote({
+        id: `note-${Date.now()}-${Math.random().toString(36)}`,
+        columnId: note.columnId,
+        content: note.content?.trim() || "",
+        userId: note.userId || "",
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("[addNote]", error);
+    } finally {
+      isProcessingBlur.value.delete(noteId);
+      blurTimeouts.value.delete(noteId);
+    }
+  }, 300); // 300ms debounce delay
+
+  blurTimeouts.value.set(noteId, timeout);
 };
 
 const retrospectiveStore = useRetrospectiveStore();
@@ -313,6 +328,13 @@ watch(
   justify-content: center;
   color: #666;
   transition: all 0.2s ease;
+}
+
+.note-user {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  text-align: right;
 }
 
 .note-delete:hover {
