@@ -15,7 +15,6 @@ const RetroColumns = resolveComponent("retro-column-space");
 const RetroQuadrant = resolveComponent("retro-quadrant-space");
 
 const COMPONENTS = {
-  [RETRO_TYPES.FREE]: RetroFree,
   [RETRO_TYPES.COLUMNS]: RetroColumns,
   [RETRO_TYPES.QUADRANT]: RetroQuadrant,
 };
